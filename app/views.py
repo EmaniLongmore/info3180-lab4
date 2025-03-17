@@ -139,6 +139,14 @@ def files():
     images = get_uploaded_images()
     return render_template('files.html', images=images)
 
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()  #  Log the user out of the session
+    flash('You have been successfully logged out.', 'success')
+    return redirect(url_for('home'))  # Send them back to the home page
+
+
 def get_uploaded_images():
     # Path to the upload folder
     upload_folder = os.path.join(os.getcwd(), app.config['UPLOAD_FOLDER'])

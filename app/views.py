@@ -1,6 +1,7 @@
 import os
 from app import app, db, login_manager
 from flask import render_template, request, redirect, url_for, flash, session, abort
+from flask import send_from_directory
 from flask_login import login_required
 from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.utils import secure_filename
@@ -122,3 +123,34 @@ def add_header(response):
 def page_not_found(error):
     """Custom 404 page."""
     return render_template('404.html'), 404
+
+
+@app.route('/uploads/<filename>')
+@login_required
+def get_image(filename):
+    return send_from_directory(
+        os.path.join(os.getcwd(), app.config['UPLOAD_FOLDER']),
+        filename
+    )
+
+@app.route('/files')
+@login_required
+def files():
+    images = get_uploaded_images()
+    return render_template('files.html', images=images)
+
+def get_uploaded_images():
+    # Path to the upload folder
+    upload_folder = os.path.join(os.getcwd(), app.config['UPLOAD_FOLDER'])
+    
+    # List to hold image filenames
+    image_list = []
+    
+    # Walk through the upload folder
+    for subdir, dirs, files in os.walk(upload_folder):
+        for file in files:
+            # Optional: filter images (if not already filtered at upload time)
+            if file.lower().endswith(('.png', '.jpg', '.jpeg')):
+                image_list.append(file)
+    
+    return image_list
